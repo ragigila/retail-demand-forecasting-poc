@@ -1,0 +1,14 @@
+# data, credentials and company-specific local config never go to git
+workdir/
+data/
+.env
+.env.*
+config.local.yaml
+location_types.local.yaml
+bc_fields.local.json
+*.ndjson
+*.parquet
+*.npz
+.venv/
+__pycache__/
+node_modules/

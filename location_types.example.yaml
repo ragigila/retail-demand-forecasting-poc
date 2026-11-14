@@ -1,0 +1,5 @@
+# Copy to location_types.local.yaml (git-ignored). Real ERP location codes; '' is the blank-code in-transit leg of transfer orders.
+warehouse: ["WAREHOUSE_CODE_1", "WAREHOUSE_CODE_2"]   # distribution centres (online sales + transfers out)
+store: ["STORE_CODE_THAT_THE_RULE_COULD_NOT_CLASSIFY"] # explicit overrides; every other location must satisfy the store rule
+exclude: ["", "TRANSIT_PARKING_CODE", "SAMPLE_OR_REJECT_CODE"]  # not a demand location
+transit_parking: ["TRANSIT_PARKING_CODE"]            # intermediary location every warehouse shipment passes through

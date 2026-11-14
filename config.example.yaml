@@ -1,0 +1,65 @@
+# Copy to config.local.yaml (git-ignored) and fill in your real values. Paths are relative to this file.
+seed: 20240101
+paths:
+  raw_dir: workdir/raw              # raw ERP extracts (REAL identifiers) - never commit
+  items_file: workdir/raw/items.ndjson
+  private_dir: workdir/private      # id_map.json (real -> pseudonym) lives here, never printed or committed
+  out_dir: workdir/outputs
+extract:
+  company: COMPANY_ID               # ERP company id used in the OData URL
+  environment: Production
+  brands: [BRAND_A, BRAND_B]        # values of Global Dimension 2 (assumed to hold the brand)
+  from_month: "2025-01"
+  to_month: "2025-12"
+period:
+  week_anchor: ISO                  # Monday-Sunday
+  last_full_week_end: "2025-12-28"  # end (Sunday) of the last complete ISO week in your extract; later rows are dropped
+profile:
+  store_min_sale_share: 0.25        # fallback location-type rule (explicit mapping file wins)
+  warehouse_max_sale_share: 0.05
+  sbc_adi_cut: 1.32
+  sbc_cv2_cut: 0.49
+  short_history_weeks: 52
+  non_merch_department_codes: ["NON_MERCH_DEPARTMENT"]   # item department(s) of packaging / non-sellable items
+bc_item_fields:                     # canonical name -> field name on your Item Card web service
+  description: Description
+  item_type: Type
+  category: Item_Category_Code
+  department: DEPARTMENT_FIELD      # company-specific custom attribute
+  class_code: CLASS_FIELD
+  dcs: DCS_FIELD
+stage2:
+  location_types_file: location_types.local.yaml
+  require_item_type: Inventory
+  excluded_item_departments: ["NON_MERCH_DEPARTMENT"]
+  lags: [1, 2, 4, 8, 52]
+  rolling_windows: [4, 8, 13]
+  holiday_country: ID
+  payday_days: [25, 1]              # a week is a "payday week" if it contains day 25 or day 1 of a month
+  leakage_check_week: 40
+stage3:
+  horizon: 4                        # weeks ahead
+  first_origin: 39                  # first forecast origin as a week index; choose from your history length
+  step: 4
+  season: 52
+  rollmean_window: 13
+  croston_alpha: 0.1                # fixed literature-default smoothing; not tuned on test data
+  tsb_alpha: 0.1
+  tsb_beta: 0.1
+  ets_min_nonzero_weeks: 8
+  lgbm:                             # fixed, not tuned
+    objective: tweedie
+    tweedie_variance_power: 1.2
+    num_leaves: 63
+    learning_rate: 0.05
+    n_estimators: 300
+    min_child_samples: 100
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 1
+    reg_lambda: 1.0
+  train_series_cap: {store: 30000, warehouse: 100000}
+  ablation_groups:
+    calendar: [iso_week, month, holiday_days, holiday_days_next_week, payday_week]
+    price: [price_lag1]
+    stockout: [stockout_lag1, stock_bal_lag1]

@@ -1,0 +1,5 @@
+{
+  "ledger_service": "Item_Ledger_Entry",
+  "item_service": "ITEM_CARD_SERVICE_NAME",
+  "item_fields": ["No", "Description", "Type", "Blocked", "Item_Category_Code", "DEPARTMENT_FIELD", "CLASS_FIELD", "DCS_FIELD"]
+}
